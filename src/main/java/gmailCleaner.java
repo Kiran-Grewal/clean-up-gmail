@@ -26,8 +26,8 @@ import java.util.List;
 public class gmailCleaner {
     private static Gmail service;
     private static final List<String> SCOPES = Collections.singletonList(GmailScopes.GMAIL_MODIFY);
-    private static String user = "me";
-    private static final int numOfDays = 30; //no. of days to keep the promotional emails
+    private static final String user = "me";
+    private static final int numOfDays = 30; //no. of days to keep the promotional emails for
 
     public static void main(String[] args) throws IOException, GeneralSecurityException {
         final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
@@ -44,17 +44,22 @@ public class gmailCleaner {
         LocalDate deleteDate = LocalDate.now().minusDays(numOfDays);
         String query = "before:" + deleteDate;
         ListMessagesResponse msgList = service.users().messages().list(user).setLabelIds(labelIds).setQ(query)
-                .setMaxResults(500L).execute();
+                                       .setMaxResults(500L).execute(); //get emails with the above criteria
         trashEmails(msgList);
+
+        String nextPageToken = msgList.getNextPageToken(); //get next page token
+        while(nextPageToken != null){
+            msgList = service.users().messages().list(user).setLabelIds(labelIds).setQ(query)
+                      .setAccessToken(nextPageToken).setMaxResults(500L).execute(); //get next set of emails with next page token
+            trashEmails(msgList);
+            nextPageToken = msgList.getNextPageToken(); //get next page token
+        }
     }
 
-    public static void trashEmails(ListMessagesResponse msgList) throws IOException {
-        int i = 0;
+    public static void trashEmails(ListMessagesResponse msgList) throws IOException { //Send emails to trash folder
         for(Message msg: msgList.getMessages()) {
             String msgId = msg.getId();
-            System.out.println(msgId);
             service.users().messages().trash(user,msgId).execute();
-            i++;
         }
     }
 
