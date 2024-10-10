@@ -1,2 +1,2 @@
 # clean-up-gmail
-Automatically delete promotional gmails older than a month.
+Automatically delete promotional emails older than a month.
