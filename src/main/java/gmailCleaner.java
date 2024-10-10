@@ -29,7 +29,7 @@ public class gmailCleaner {
     private static String user = "me";
     private static final int numOfDays = 30; //no. of days to keep the promotional emails
 
-    public static void main(String[] args) throws IOException, GeneralSecurityException{
+    public static void main(String[] args) throws IOException, GeneralSecurityException {
         final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
         final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         service = new Gmail.Builder(httpTransport, jsonFactory, getCredentials(httpTransport, jsonFactory))
@@ -42,9 +42,20 @@ public class gmailCleaner {
         List<String> labelIds = new ArrayList<>();
         labelIds.add("CATEGORY_PROMOTIONS");
         LocalDate deleteDate = LocalDate.now().minusDays(numOfDays);
-        String query = "before:"+deleteDate;
+        String query = "before:" + deleteDate;
         ListMessagesResponse msgList = service.users().messages().list(user).setLabelIds(labelIds).setQ(query)
-                                       .setMaxResults(500L).execute();
+                .setMaxResults(500L).execute();
+        trashEmails(msgList);
+    }
+
+    public static void trashEmails(ListMessagesResponse msgList) throws IOException {
+        int i = 0;
+        for(Message msg: msgList.getMessages()) {
+            String msgId = msg.getId();
+            System.out.println(msgId);
+            service.users().messages().trash(user,msgId).execute();
+            i++;
+        }
     }
 
     private static Credential getCredentials(final NetHttpTransport httpTransport, JsonFactory jsonFactory)
@@ -68,5 +79,4 @@ public class gmailCleaner {
         //returns an authorized Credential object.
         return credential;
     }
-
 }
