@@ -10,29 +10,41 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
+import com.google.api.services.gmail.model.ListMessagesResponse;
+import com.google.api.services.gmail.model.Message;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class gmailCleaner {
-    private static final List<String> SCOPES = Collections.singletonList(GmailScopes.GMAIL_LABELS); //Need to change later
+    private static Gmail service;
+    private static final List<String> SCOPES = Collections.singletonList(GmailScopes.GMAIL_MODIFY);
+    private static String user = "me";
+    private static final int numOfDays = 30; //no. of days to keep the promotional emails
 
-    public gmailCleaner() throws IOException, GeneralSecurityException{
+    public static void main(String[] args) throws IOException, GeneralSecurityException{
         final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
         final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        Gmail service = new Gmail.Builder(httpTransport, jsonFactory, getCredentials(httpTransport, jsonFactory))
+        service = new Gmail.Builder(httpTransport, jsonFactory, getCredentials(httpTransport, jsonFactory))
                 .setApplicationName("clean-up-gmail")
                 .build();
+        getPromotionsMails();
     }
 
-
-    public static void main(String[] args) {
-
+    public static void getPromotionsMails() throws IOException { //get Promotional mails older than numOfDays
+        List<String> labelIds = new ArrayList<>();
+        labelIds.add("CATEGORY_PROMOTIONS");
+        LocalDate deleteDate = LocalDate.now().minusDays(numOfDays);
+        String query = "before:"+deleteDate;
+        ListMessagesResponse msgList = service.users().messages().list(user).setLabelIds(labelIds).setQ(query)
+                                       .setMaxResults(500L).execute();
     }
 
     private static Credential getCredentials(final NetHttpTransport httpTransport, JsonFactory jsonFactory)
