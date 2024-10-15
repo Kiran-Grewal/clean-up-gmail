@@ -45,15 +45,25 @@ public class gmailCleaner {
         String query = "before:" + deleteDate;
         ListMessagesResponse msgList = service.users().messages().list(user).setLabelIds(labelIds).setQ(query)
                                        .setMaxResults(500L).execute(); //get emails with the above criteria
-        trashEmails(msgList);
 
-        String nextPageToken = msgList.getNextPageToken(); //get next page token
-        while(nextPageToken != null){
-            msgList = service.users().messages().list(user).setLabelIds(labelIds).setQ(query)
-                      .setAccessToken(nextPageToken).setMaxResults(500L).execute(); //get next set of emails with next page token
+        if(msgList.getMessages() != null) {
+            int i = msgList.getMessages().size();
             trashEmails(msgList);
-            nextPageToken = msgList.getNextPageToken(); //get next page token
+
+            String nextPageToken = msgList.getNextPageToken(); //get next page token
+            while (nextPageToken != null) {
+                msgList = service.users().messages().list(user).setLabelIds(labelIds).setQ(query)
+                        .setAccessToken(nextPageToken).setMaxResults(500L).execute(); //get next set of emails with next page token
+                i += msgList.getMessages().size();
+                trashEmails(msgList);
+                nextPageToken = msgList.getNextPageToken(); //get next page token
+            }
+            System.out.println(i + " emails moved to the trash folder.");
         }
+        else {
+                System.out.println("No emails older than " + deleteDate + " were found.");
+        }
+
     }
 
     public static void trashEmails(ListMessagesResponse msgList) throws IOException { //Send emails to trash folder
