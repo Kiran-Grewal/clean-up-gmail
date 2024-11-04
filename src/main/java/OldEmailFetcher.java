@@ -35,10 +35,10 @@ public class OldEmailFetcher {
 
     public ListMessagesResponse getOldEmails() throws IOException {
         ListMessagesResponse msgList = service.users().messages().list(user)
-                                            .setLabelIds(labelIds)
-                                            .setQ(query)
-                                            .setMaxResults(500L)
-                                            .execute(); //get emails with the above criteria
+                                                .setLabelIds(labelIds)
+                                                .setQ(query)
+                                                .setMaxResults(500L)
+                                                .execute(); //get emails with the above criteria
 
         nextPageToken = msgList.getNextPageToken(); //get next page token
         hasMoreEmails = (nextPageToken != null);
@@ -46,7 +46,7 @@ public class OldEmailFetcher {
         return msgList;
     }
 
-    public ListMessagesResponse getMoreOldEmails() throws IOException {
+    public ListMessagesResponse getMoreOldEmails() throws IOException { //return next set of emails with next page token
         ListMessagesResponse msgList = service.users().messages().list(user)
                                                 .setLabelIds(labelIds)
                                                 .setQ(query)

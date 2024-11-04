@@ -29,5 +29,10 @@ public class GmailCleaner {
         else {
             System.out.println("No emails older than " + oldEmailFetcher.getDeleteDate() + " were found.");
         }
+
+        //not proper
+        ExpiredCouponsFetcher expiredCouponsFetcher = new ExpiredCouponsFetcher(service);
+        expiredCouponsFetcher.getExpiredEmails();
+
     }
 }
