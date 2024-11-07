@@ -18,5 +18,8 @@ public class EmailTrasher {
             service.users().messages().trash(user,msgId).execute();
         }
     }
+    public void trashEmails(String msgId) throws IOException { //Send emails to trash folder
+            service.users().messages().trash(user,msgId).execute();
+    }
 
 }
