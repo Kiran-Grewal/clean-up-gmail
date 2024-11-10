@@ -37,7 +37,7 @@ public class ExpiredCouponsFetcher {
                 String emailBody = "";
                 boolean isExpired;
                 for (Message msg : msgList.getMessages()) {     //for every msg get emailBody
-                    //Message msg = msgList.getMessages().get(194);
+//                    Message msg = msgList.getMessages().get(337);
                     String msgId = msg.getId();
                     emailBody = getEmailBody(msgId);            //returns emailBody for the msgId
                     isExpired = checkExpiry(emailBody);
@@ -99,10 +99,13 @@ public class ExpiredCouponsFetcher {
         Pattern keywordsPattern = Pattern.compile(keywords, Pattern.CASE_INSENSITIVE);
         String shortMonths = "(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)";
         String longMonths = "(January|February|March|April|May|June|July|August|September|October|November|December)";
-        String mdyDateFormat = "((0*[1-9])|([1-2][0-2]))+/0*[1-9]+/\\d+";
-        String dmyDateFormat = "0*[1-9]+/((0*[1-9])|([1-2][0-2]))/\\d+";
-        String shortEngDateFormat = shortMonths + "\\s\\d+,\\s\\d+";
-        String longEngDateFormat = longMonths + "\\s\\d+,\\s\\d+";
+        String daySyntax = "(0*[1-9])|([1-3][0-9])";
+        String monthSyntax = "(0*[1-9])|([1-2][0-2])";
+        String yearSyntax = "(20[0-9]{2})|\\d{2}";
+        String mdyDateFormat = monthSyntax + "/" + daySyntax + "/" + yearSyntax;
+        String dmyDateFormat = daySyntax + "/" + monthSyntax + "/" + yearSyntax;
+        String shortEngDateFormat = shortMonths + "\\s+" +daySyntax +",\\s"+yearSyntax;
+        String longEngDateFormat = longMonths + "\\s" + daySyntax+ ",\\s" +yearSyntax;
         Pattern datePattern = Pattern.compile(mdyDateFormat);
         Matcher dateMatcher = datePattern.matcher(emailBody);
         DateTimeFormatter formatter;
@@ -114,10 +117,11 @@ public class ExpiredCouponsFetcher {
 
         if (keywordsMatcher.find()) {
             if (dateMatcher.find()) {
-                String sameDate = dateMatcher.group();
+//                String sameDate = dateMatcher.group();
 
                 datePattern = Pattern.compile(dmyDateFormat);
                 dateMatcher = datePattern.matcher(emailBody);
+
 //                if(dateMatcher.find()){
 //                    dateMatcher = datePattern.matcher(sameDate);
 //                    if(!dateMatcher.find()){
@@ -155,7 +159,7 @@ public class ExpiredCouponsFetcher {
                 }
             }
             while (dateMatcher.find()) {
-                StringDate = dateMatcher.group();
+                StringDate = dateMatcher.group().replaceAll("\\s+"," ");
                 LocalDate checkDate = LocalDate.parse(StringDate, formatter);
                 if (checkDate.isAfter(expiryDate)) {
                     expiryDate = checkDate;
