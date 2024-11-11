@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ExpiredCouponsFetcher {
+public class ExpiredCouponFetcher {
     private Gmail service;
     private EmailTrasher emailTrasher;
     private static final String user = "me";
@@ -19,13 +19,13 @@ public class ExpiredCouponsFetcher {
     private String nextPageToken;
     private boolean hasMoreEmails;
 
-    public ExpiredCouponsFetcher(Gmail service,EmailTrasher emailTrasher) {
+    public ExpiredCouponFetcher(Gmail service,EmailTrasher emailTrasher) {
         this.service = service;
         this.emailTrasher = emailTrasher;
         labelIds.add("CATEGORY_PROMOTIONS"); //to filter promotional emails
     }
 
-    public void getExpiredEmails() throws IOException{
+    public void trashExpiredEmails() throws IOException{
         ListMessagesResponse msgList = getPromotionalEmails();  //list of first 500 promotional mails
         int expiredEmailCount = 0;
 
@@ -66,7 +66,7 @@ public class ExpiredCouponsFetcher {
             while (!found && i < parts.size()) {
                 if (parts.get(i).getMimeType().equals("text/plain")) {
                     found = true;
-                    msgBody = parts.get(i).getBody().getData();     // the email text body as base64URL encoded String
+                    msgBody = "";     // the email text body as base64URL encoded String
                 }
                 else if (parts.get(i).getMimeType().equals("multipart/alternative")) {
                     //if one part is "multipart/alternative" in itself then it would probably have "text/plain" part inside it
@@ -75,7 +75,7 @@ public class ExpiredCouponsFetcher {
                     while (!found && j < partsOfParts.size()) {
                         if (partsOfParts.get(j).getMimeType().equals("text/plain")) {
                             found = true;
-                            msgBody = partsOfParts.get(j).getBody().getData();
+                            msgBody = "";
                         }
                         j++;
                     }
@@ -84,10 +84,10 @@ public class ExpiredCouponsFetcher {
             }
         }
         else if(mimeType.equals("text/plain")){
-            msgBody = msgPayload.getBody().getData();
+            msgBody = "";
         }
         else if(mimeType.equals("text/html")){                                  //if no "text/plain" is there
-            msgBody = "";
+            msgBody = msgPayload.getBody().getData();
         }
         byte[] decodedBodyBytes = Base64.getUrlDecoder().decode(msgBody);       //decoding msgBody to Bytes
         String actualBody = new String(decodedBodyBytes);                       //converting bytes to String
@@ -99,9 +99,9 @@ public class ExpiredCouponsFetcher {
         Pattern keywordsPattern = Pattern.compile(keywords, Pattern.CASE_INSENSITIVE);
         String shortMonths = "(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)";
         String longMonths = "(January|February|March|April|May|June|July|August|September|October|November|December)";
-        String daySyntax = "(0*[1-9])|([1-3][0-9])";
-        String monthSyntax = "(0*[1-9])|([1-2][0-2])";
-        String yearSyntax = "(20[0-9]{2})|\\d{2}";
+        String daySyntax = "((0*[1-9])|([1-3][0-9]))";
+        String monthSyntax = "((0*[1-9])|([1-2][0-2]))";
+        String yearSyntax = "((20[0-9]{2})|\\d{2})";
         String mdyDateFormat = monthSyntax + "/" + daySyntax + "/" + yearSyntax;
         String dmyDateFormat = daySyntax + "/" + monthSyntax + "/" + yearSyntax;
         String shortEngDateFormat = shortMonths + "\\s+" +daySyntax +",\\s"+yearSyntax;
@@ -170,6 +170,7 @@ public class ExpiredCouponsFetcher {
         if(expiryDate.equals(LocalDate.of(2000, 1, 1))){
             isExpired = false;
         }
+        if(isExpired) System.out.println(expiryDate);
         return isExpired;
     }
 
