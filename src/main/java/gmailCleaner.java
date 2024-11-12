@@ -16,8 +16,11 @@ public class GmailCleaner {
 //        OldEmailFetcher oldEmailFetcher = new OldEmailFetcher(service,emailTrasher);
 //        oldEmailFetcher.trashOldEmails();
 
-//        ExpiredCouponFetcher expiredCouponFetcher = new ExpiredCouponsFetcher(service,emailTrasher);
-//        expiredCouponsFetcher.getExpiredEmails();
+        EmailBodyFetcher emailBodyFetcher = new EmailBodyFetcher(service);
+        EmailExpiryChecker emailExpiryChecker = new EmailExpiryChecker(service);
+        ExpiredCouponFetcher expiredCouponFetcher = new ExpiredCouponFetcher(service,emailTrasher,
+                                                            emailBodyFetcher,emailExpiryChecker);
+        expiredCouponFetcher.trashEmails();
 
     }
 }
