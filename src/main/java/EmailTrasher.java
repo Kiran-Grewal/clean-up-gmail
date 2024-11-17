@@ -19,7 +19,7 @@ public class EmailTrasher {
         }
     }
 
-    public void trashEmails(String msgId) throws IOException {      //Send emails to trash folder
+    public void trashEmails(String msgId) throws IOException {      //Send email to trash folder
             service.users().messages().trash(user,msgId).execute();
     }
 

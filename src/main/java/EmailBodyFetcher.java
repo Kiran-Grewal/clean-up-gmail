@@ -59,14 +59,14 @@ public class EmailBodyFetcher {
         return actualBody;
     }
 
-    private boolean msgBody findEmailBody(List<MessagePart> parts) {
-        boolean found = false;                                  //is "Text/plain" part found
-        int i = 0;
-        while (!found && i < parts.size()) {
-            if (parts.get(i).getMimeType().equals("text/plain")) {
-                found = true;
-                msgBody = parts.get(i).getBody().getData();     // the email text body as base64URL encoded String
-            }
-        }
-    }
+//    private boolean msgBody findEmailBody(List<MessagePart> parts) {
+//        boolean found = false;                                  //is "Text/plain" part found
+//        int i = 0;
+//        while (!found && i < parts.size()) {
+//            if (parts.get(i).getMimeType().equals("text/plain")) {
+//                found = true;
+//                msgBody = parts.get(i).getBody().getData();     // the email text body as base64URL encoded String
+//            }
+//        }
+//    }
 }
