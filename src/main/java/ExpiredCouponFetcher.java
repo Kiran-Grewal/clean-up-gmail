@@ -33,7 +33,7 @@ public class ExpiredCouponFetcher {
         if(msgList.getMessages() != null){                //if there are any messages
             trashExpiredEmails(msgList);
             while(hasMoreEmails){
-                msgList = getMorePromotionalEmails();           //get next 500 promotional emails with page token
+                msgList = getPromotionalEmails();           //get next 500 promotional emails with page token
                 trashExpiredEmails(msgList);
             }
             System.out.println(expiredEmailCount + " emails moved to the trash folder.");
@@ -63,24 +63,15 @@ public class ExpiredCouponFetcher {
     }
 
     private ListMessagesResponse getPromotionalEmails() throws IOException { //returns first 500 promotional emails
-        ListMessagesResponse msgList = service.users().messages().list(user)
+        Gmail.Users.Messages.List request = service.users().messages().list(user)
                                                 .setLabelIds(labelIds)
-                                                .setMaxResults(500L)
-                                                .execute(); //get emails with the above criteria
+                                                .setMaxResults(500L);
 
-        nextPageToken = msgList.getNextPageToken(); //get next page token
-        hasMoreEmails = (nextPageToken != null);
+        if(hasMoreEmails){
+            request.setPageToken(nextPageToken);
+        }
 
-        return msgList;
-    }
-
-    private ListMessagesResponse getMorePromotionalEmails() throws IOException { //returns emails with next page token
-        ListMessagesResponse msgList = service.users().messages().list(user)
-                                                .setLabelIds(labelIds)
-                                                .setPageToken(nextPageToken)
-                                                .setMaxResults(500L)
-                                                .execute(); //get emails with the above criteria
-
+        ListMessagesResponse msgList = request.execute();   //returns emails with the above criteria
         nextPageToken = msgList.getNextPageToken(); //get next page token
         hasMoreEmails = (nextPageToken != null);
 
