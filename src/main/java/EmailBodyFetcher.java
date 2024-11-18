@@ -24,49 +24,36 @@ public class EmailBodyFetcher {
         MessagePart msgPayload = msg.getPayload();                  //parsed email structure
         String mimeType = msgPayload.getMimeType();                 //the mime type
         String msgBody = "";                                        // the email text body as base64URL encoded String
-        if(mimeType.equals("text/plain")){
+        if (mimeType.equals("text/plain")) {
             msgBody = msgPayload.getBody().getData();
         }
-        else if(mimeType.equals("text/html")){                                  //if no "text/plain" is there
+        else if (mimeType.equals("text/html")) {                    //if no "text/plain" is there
             msgBody = "";
         }
-        else if (mimeType.equals("multipart/alternative") || mimeType.equals("multipart/mixed")) {
-            List<MessagePart> parts = msgPayload.getParts();        //List of Parts
-            boolean found = false;                                  //is "Text/plain" part found
-            int i = 0;
-            while (!found && i < parts.size()) {
-                if (parts.get(i).getMimeType().equals("text/plain")) {
-                    found = true;
-                    msgBody = parts.get(i).getBody().getData();     // the email text body as base64URL encoded String
-                }
-                else if (parts.get(i).getMimeType().equals("multipart/alternative")) {
-                    //if one part is "multipart/alternative" in itself then it would probably have "text/plain" part inside it
-                    List<MessagePart> partsOfParts = parts.get(i).getParts();
-                    int j = 0;
-                    while (!found && j < partsOfParts.size()) {
-                        if (partsOfParts.get(j).getMimeType().equals("text/plain")) {
-                            found = true;
-                            msgBody = partsOfParts.get(j).getBody().getData();
-                        }
-                        j++;
-                    }
-                }
-                i++;
-            }
+        else if (mimeType.startsWith("multipart/")){
+            msgBody = findEmailBody(msgPayload);
         }
         byte[] decodedBodyBytes = Base64.getUrlDecoder().decode(msgBody);       //decoding msgBody to Bytes
         String actualBody = new String(decodedBodyBytes);                       //converting bytes to String
         return actualBody;
     }
 
-//    private boolean msgBody findEmailBody(List<MessagePart> parts) {
-//        boolean found = false;                                  //is "Text/plain" part found
-//        int i = 0;
-//        while (!found && i < parts.size()) {
-//            if (parts.get(i).getMimeType().equals("text/plain")) {
-//                found = true;
-//                msgBody = parts.get(i).getBody().getData();     // the email text body as base64URL encoded String
-//            }
-//        }
-//    }
+    private String findEmailBody(MessagePart msgPayload) {
+        List<MessagePart> parts = msgPayload.getParts();        //List of Parts
+        boolean found = false;                                  //is "Text/plain" part found
+        String msgBody = "";
+
+        for(MessagePart msgPart: parts) {
+            if (msgPart.getMimeType().equals("text/plain")) {
+                msgBody = msgPart.getBody().getData();     // the email text body as base64URL encoded String
+                return msgBody;
+            } else if (msgPart.getMimeType().equals("multipart/alternative")) {
+                //if one part is "multipart/alternative" in itself then it would probably have "text/plain" part inside it
+                //call recursive method findEmailBody for parts of multipart/alternative
+                msgBody = findEmailBody(msgPart);
+            }
+        }
+        return msgBody;
+    }
+
 }

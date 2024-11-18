@@ -47,15 +47,18 @@ public class ExpiredCouponFetcher {
     private void trashExpiredEmails(ListMessagesResponse msgList) throws IOException {
             String emailBody = "";
             boolean isExpired;
+            int i = 0;
             for (Message msg : msgList.getMessages()) {     //for every msg get emailBody
 //                    Message msg = msgList.getMessages().get(337);
                 String msgId = msg.getId();
+                System.out.print(i);
                 emailBody = emailBodyFetcher.getEmailBody(msgId);            //returns emailBody for the msgId
-                isExpired = emailExpiryChecker.checkExpiry(emailBody);
-                if(isExpired){
-                    emailTrasher.trashEmails(msgId);
-                    expiredEmailCount++;
-                }
+//                isExpired = emailExpiryChecker.checkExpiry(emailBody);
+//                if(isExpired){
+//                    emailTrasher.trashEmails(msgId);
+//                    expiredEmailCount++;
+//                }
+                i++;
             }
     }
 
