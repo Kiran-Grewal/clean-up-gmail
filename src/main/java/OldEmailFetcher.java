@@ -27,16 +27,17 @@ public class OldEmailFetcher {
         hasMoreEmails = false;
     }
 
-    public void trashOldEmails() throws IOException {   //trashes promotional emails older than a month
+    public void trashOldEmails() {   //trashes promotional emails older than a month
         ListMessagesResponse msgList;
         int trashedEmailsCount = 0;     //Counter for the number of deleted emails
         do {
-            msgList = getOldEmails();   //get promotional emails older than a month
+            msgList = getOldEmails();
 
             if (msgList.getMessages() != null) {
                 trashedEmailsCount += msgList.getMessages().size();
                 emailTrasher.trashEmails(msgList);   //move all the emails in msgList to trash
             }
+
         } while(hasMoreEmails);     //get next set of emails if there are any
 
         if(trashedEmailsCount > 0) {
@@ -47,19 +48,26 @@ public class OldEmailFetcher {
         }
     }
 
-    private ListMessagesResponse getOldEmails() throws IOException { //return promotional emails older than a month
-        //API request to fetch emails with the following criteria
-        Gmail.Users.Messages.List request = service.users().messages().list(user)
-                                                .setLabelIds(labelIds)
-                                                .setQ(query)
-                                                .setMaxResults(500L);
-        if(hasMoreEmails){
-            request.setPageToken(nextPageToken);
-        }
+    private ListMessagesResponse getOldEmails(){ //return promotional emails older than a month
+        ListMessagesResponse msgList = null;
 
-        ListMessagesResponse msgList = request.execute();   //returns emails with the above criteria
-        nextPageToken = msgList.getNextPageToken();         //get next page token
-        hasMoreEmails = (nextPageToken != null);
+        try {
+            //API request to fetch emails with the following criteria
+            Gmail.Users.Messages.List request = service.users().messages().list(user)
+                                                    .setLabelIds(labelIds)
+                                                    .setQ(query)
+                                                    .setMaxResults(500L);
+            if(hasMoreEmails){
+                request.setPageToken(nextPageToken);
+            }
+
+            msgList = request.execute();   //returns emails with the above criteria
+            nextPageToken = msgList.getNextPageToken();         //get next page token
+            hasMoreEmails = (nextPageToken != null);
+        }
+        catch(IOException exp){
+            System.out.println("Failed to retrieve promotional emails. Error : " + exp.getMessage());
+        }
 
         return msgList;
     }

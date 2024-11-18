@@ -12,15 +12,25 @@ public class EmailTrasher {
         this.service = service;
     }
 
-    public void trashEmails(ListMessagesResponse msgList) throws IOException {  //Send emails to trash folder
+    public void trashEmails(ListMessagesResponse msgList) {  //Send emails to trash folder
         for(Message msg: msgList.getMessages()) {
             String msgId = msg.getId();
-            service.users().messages().trash(user,msgId).execute();
+            try {
+                service.users().messages().trash(user, msgId).execute();
+            }
+            catch(IOException exp){
+                System.out.println("Failed to trash email. Error : " + exp.getMessage());
+            }
         }
     }
 
-    public void trashEmails(String msgId) throws IOException {      //Send email to trash folder
-            service.users().messages().trash(user,msgId).execute();
+    public void trashEmails(String msgId) {      //Send email to trash folder
+        try {
+            service.users().messages().trash(user, msgId).execute();
+        }
+        catch(IOException exp){
+            System.out.println("Failed to trash email. Error : " + exp.getMessage());
+        }
     }
 
 }

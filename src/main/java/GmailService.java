@@ -22,6 +22,7 @@ import java.util.List;
 public class GmailService {
     private Gmail service; // the gmail API client service.
     private static final List<String> SCOPES = Collections.singletonList(GmailScopes.GMAIL_MODIFY); //scope of Application
+    private static final String applicationName = "clean-up-gmail";
 
     public GmailService() throws IOException, GeneralSecurityException{
         service = createService();
@@ -36,7 +37,7 @@ public class GmailService {
         final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
         final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         return service = new Gmail.Builder(httpTransport, jsonFactory, getCredentials(httpTransport, jsonFactory))
-                .setApplicationName("clean-up-gmail")
+                .setApplicationName(applicationName)
                 .build();
     }
 
