@@ -29,7 +29,7 @@ public class EmailBodyFetcher {
     private String retrieveEmailBody(Message msg) {                 //returns emailBody for the msg
         MessagePart msgPayload = msg.getPayload();                  //parsed email structure
         String mimeType = msgPayload.getMimeType();                 //the mime type
-        String msgBody = "";                                        // the email text body as base64URL encoded String
+        String msgBody = "";                                        //the email text body as base64URL encoded String
         if (mimeType.equals("text/plain")) {
             msgBody = msgPayload.getBody().getData();
         }
@@ -51,7 +51,7 @@ public class EmailBodyFetcher {
 
         for(MessagePart msgPart: parts) {
             if (msgPart.getMimeType().equals("text/plain")) {
-                msgBody = msgPart.getBody().getData();                // the email text body as base64URL encoded String
+                msgBody = msgPart.getBody().getData();                //the email text body as base64URL encoded String
                 return msgBody;
             }
             else if (msgPart.getMimeType().equals("multipart/alternative")) {

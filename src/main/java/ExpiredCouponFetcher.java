@@ -25,6 +25,7 @@ public class ExpiredCouponFetcher {
         this.emailExpiryChecker = emailExpiryChecker;
         labelIds.add("CATEGORY_PROMOTIONS"); //to filter promotional emails
         expiredEmailCount = 0;
+        hasMoreEmails = false;
     }
 
     public void trashEmails() throws IOException{
@@ -47,18 +48,15 @@ public class ExpiredCouponFetcher {
     private void trashExpiredEmails(ListMessagesResponse msgList) throws IOException {
             String emailBody = "";
             boolean isExpired;
-            int i = 0;
             for (Message msg : msgList.getMessages()) {     //for every msg get emailBody
-//                    Message msg = msgList.getMessages().get(337);
+//        Message msg = msgList.getMessages().get(2);
                 String msgId = msg.getId();
-                System.out.print(i);
                 emailBody = emailBodyFetcher.getEmailBody(msgId);            //returns emailBody for the msgId
-//                isExpired = emailExpiryChecker.checkExpiry(emailBody);
-//                if(isExpired){
-//                    emailTrasher.trashEmails(msgId);
-//                    expiredEmailCount++;
-//                }
-                i++;
+                isExpired = emailExpiryChecker.checkExpiry(emailBody);
+                if(isExpired){
+                    emailTrasher.trashEmails(msgId);
+                    expiredEmailCount++;
+                }
             }
     }
 
