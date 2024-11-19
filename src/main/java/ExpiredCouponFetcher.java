@@ -6,10 +6,10 @@ import java.io.IOException;
 import java.util.*;
 
 public class ExpiredCouponFetcher {
-    private Gmail service;
-    private EmailTrasher emailTrasher;
-    private EmailBodyFetcher emailBodyFetcher;
-    private EmailExpiryChecker emailExpiryChecker;
+    private final Gmail service;
+    private final EmailTrasher emailTrasher;
+    private final EmailBodyFetcher emailBodyFetcher;
+    private final EmailExpiryChecker emailExpiryChecker;
     private static final String user = "me";
 
     private final List<String> labelIds = new ArrayList<>(); //to filter promotional emails
@@ -23,55 +23,64 @@ public class ExpiredCouponFetcher {
         this.emailTrasher = emailTrasher;
         this.emailBodyFetcher = emailBodyFetcher;
         this.emailExpiryChecker = emailExpiryChecker;
-        labelIds.add("CATEGORY_PROMOTIONS"); //to filter promotional emails
-        expiredEmailCount = 0;
+        labelIds.add("CATEGORY_PROMOTIONS");    //to filter promotional emails
+        expiredEmailCount = 0;                  //Counter for the number of emails with expired offers
         hasMoreEmails = false;
     }
 
-    public void trashEmails() throws IOException{
-        ListMessagesResponse msgList = getPromotionalEmails();  //list of first 500 promotional mails
+    public void trashExpiredEmails() {
+        ListMessagesResponse msgList;
+        do{
+            msgList = getPromotionalEmails();
 
-        if(msgList.getMessages() != null){                //if there are any messages
-            trashExpiredEmails(msgList);
-            while(hasMoreEmails){
-                msgList = getPromotionalEmails();           //get next 500 promotional emails with page token
-                trashExpiredEmails(msgList);
+            if(msgList.getMessages() != null) {
+                findExpiredEmails(msgList);         //finds emails with expired offers and trashes them
             }
-            System.out.println(expiredEmailCount + " emails moved to the trash folder.");
+
+        } while(hasMoreEmails);     //get next set of emails if there are any
+
+        if(expiredEmailCount > 0) {
+            System.out.println(expiredEmailCount + " expired emails moved to the trash folder.");
         }
         else {
-            System.out.println("No expired emails were found.");
+        System.out.println("No expired emails were found.");
         }
-
     }
 
-    private void trashExpiredEmails(ListMessagesResponse msgList) throws IOException {
-            String emailBody = "";
-            boolean isExpired;
-            for (Message msg : msgList.getMessages()) {     //for every msg get emailBody
-//        Message msg = msgList.getMessages().get(2);
-                String msgId = msg.getId();
-                emailBody = emailBodyFetcher.getEmailBody(msgId);            //returns emailBody for the msgId
-                isExpired = emailExpiryChecker.checkExpiry(emailBody);
-                if(isExpired){
-                    emailTrasher.trashEmails(msgId);
-                    expiredEmailCount++;
-                }
+    private void findExpiredEmails(ListMessagesResponse msgList) {  //finds emails with expired offers and trashes them
+        String emailBody;
+        boolean isExpired;
+
+        for (Message msg : msgList.getMessages()) {
+            String msgId = msg.getId();
+            emailBody = emailBodyFetcher.getEmailBody(msgId);            //returns emailBody for the msgId
+            isExpired = emailExpiryChecker.checkExpiry(emailBody);       //returns true if an expired offer is found
+            if (isExpired) {
+                emailTrasher.trashEmails(msgId);
+                expiredEmailCount++;
             }
+        }
     }
 
-    private ListMessagesResponse getPromotionalEmails() throws IOException { //returns first 500 promotional emails
-        Gmail.Users.Messages.List request = service.users().messages().list(user)
-                                                .setLabelIds(labelIds)
-                                                .setMaxResults(500L);
+    private ListMessagesResponse getPromotionalEmails() {      //return promotional emails
+        ListMessagesResponse msgList = null;
 
-        if(hasMoreEmails){
-            request.setPageToken(nextPageToken);
+        try{
+            //API request to fetch emails with the following criteria
+            Gmail.Users.Messages.List request = service.users().messages().list(user)
+                                                    .setLabelIds(labelIds)
+                                                    .setMaxResults(500L);
+            if(hasMoreEmails){
+                request.setPageToken(nextPageToken);
+            }
+
+            msgList = request.execute();                    //returns emails with the above criteria
+            nextPageToken = msgList.getNextPageToken();     //get next page token
+            hasMoreEmails = (nextPageToken != null);
         }
-
-        ListMessagesResponse msgList = request.execute();   //returns emails with the above criteria
-        nextPageToken = msgList.getNextPageToken(); //get next page token
-        hasMoreEmails = (nextPageToken != null);
+        catch(IOException exp){
+            System.out.println("Failed to retrieve promotional emails. Error : " + exp.getMessage());
+        }
 
         return msgList;
     }

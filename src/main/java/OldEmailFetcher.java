@@ -48,7 +48,7 @@ public class OldEmailFetcher {
         }
     }
 
-    private ListMessagesResponse getOldEmails(){ //return promotional emails older than a month
+    private ListMessagesResponse getOldEmails(){    //return promotional emails older than a month
         ListMessagesResponse msgList = null;
 
         try {
@@ -61,8 +61,8 @@ public class OldEmailFetcher {
                 request.setPageToken(nextPageToken);
             }
 
-            msgList = request.execute();   //returns emails with the above criteria
-            nextPageToken = msgList.getNextPageToken();         //get next page token
+            msgList = request.execute();                    //returns emails with the above criteria
+            nextPageToken = msgList.getNextPageToken();     //get next page token
             hasMoreEmails = (nextPageToken != null);
         }
         catch(IOException exp){
