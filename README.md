@@ -1,5 +1,5 @@
 # clean-up-gmail
-Automatically delete promotional emails older than a month using Gmail API.
+Automatically deletes promotional emails with expired coupons and promotional emails older than a month using Gmail API.
 
 ## Installation
 1. Clone the repository:
@@ -20,7 +20,6 @@ Note: The first time you run the program, a browser window will open, and you'll
 ## Usage
 Run the gmailCleaner.main( ) and all of your promotional emails older than a month would be moved to the trash folder.
 
-![](https://github.com/Kiran-Grewal/clean-up-gmail/blob/main/screenshots/running%20gmailCleaner.main().png)
 
 
    
