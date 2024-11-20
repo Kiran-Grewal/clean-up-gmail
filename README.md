@@ -1,5 +1,6 @@
 # clean-up-gmail
-Automatically deletes promotional emails with expired coupons and promotional emails older than a month using Gmail API.
+Automatically deletes promotional emails with expired coupons or offers 
+and promotional emails older than a month using Gmail API.
 
 ## Installation
 1. Clone the repository:
