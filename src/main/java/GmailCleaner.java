@@ -13,13 +13,15 @@ public class GmailCleaner {
         EmailTrasher emailTrasher = new EmailTrasher(service);
 
         OldEmailFetcher oldEmailFetcher = new OldEmailFetcher(service,emailTrasher);
-        oldEmailFetcher.trashOldEmails();
+        oldEmailFetcher.trashEmails();
 
-//        EmailBodyFetcher emailBodyFetcher = new EmailBodyFetcher(service);
-//        EmailExpiryChecker emailExpiryChecker = new EmailExpiryChecker();
-//        ExpiredCouponFetcher expiredCouponFetcher = new ExpiredCouponFetcher(service,emailTrasher,
-//                                                            emailBodyFetcher,emailExpiryChecker);
-//        expiredCouponFetcher.trashExpiredEmails();
+        EmailBodyFetcher emailBodyFetcher = new EmailBodyFetcher(service);
+        EmailExpiryChecker emailExpiryChecker = new EmailExpiryChecker();
+        ExpiredCouponFetcher expiredCouponFetcher = new ExpiredCouponFetcher(service,emailTrasher,
+                                                            emailBodyFetcher,emailExpiryChecker);
+        expiredCouponFetcher.trashEmails();
+
+        oldEmailFetcher.logOutput();
 
     }
 }
