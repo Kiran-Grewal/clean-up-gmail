@@ -21,7 +21,5 @@ public class GmailCleaner {
                                                             emailBodyFetcher,emailExpiryChecker);
         expiredCouponFetcher.trashEmails();
 
-        oldEmailFetcher.logOutput();
-
     }
 }

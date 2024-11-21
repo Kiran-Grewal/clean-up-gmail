@@ -15,8 +15,6 @@ public abstract class EmailFetcher {
     protected String query = "";                               //the query to get emails older than numOfDays
     protected LocalDate deleteDate;
     protected ListMessagesResponse msgList = null;
-    protected int oldEmailsCount;                              //Counter for the number of old emails
-    protected int expiredEmailsCount;                          //Counter for the number of emails with expired offers
     protected String nextPageToken;
     protected boolean hasMoreEmails;
 
@@ -25,8 +23,6 @@ public abstract class EmailFetcher {
         this.emailTrasher = emailTrasher;
         labelIds.add("CATEGORY_PROMOTIONS");    //to filter promotional emails
         hasMoreEmails = false;
-        oldEmailsCount = 0;
-        expiredEmailsCount = 0;
     }
 
     protected void trashEmails() {      //trashes promotional emails
@@ -39,22 +35,13 @@ public abstract class EmailFetcher {
 
         } while(hasMoreEmails);         //get next set of emails if there are any
 
-    }
+        logOutput();                    //print output
 
-    protected void logOutput(){            //to print the output
-
-        if(oldEmailsCount > 0 || expiredEmailsCount > 0) {
-            System.out.println(oldEmailsCount + expiredEmailsCount + " emails moved to the trash folder.");
-        }
-        if(oldEmailsCount == 0){
-            System.out.println("No emails older than " + deleteDate + " were found.");
-        }
-        if(expiredEmailsCount == 0){
-            System.out.println("No expired emails were found.");
-        }
     }
 
     protected abstract void trashProcedure();               //specific actions for subclasses to trash emails
+
+    protected abstract void logOutput();                    //print output
 
     protected ListMessagesResponse getPromotionalEmails() { //return promotional emails
 
