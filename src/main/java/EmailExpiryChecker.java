@@ -10,11 +10,18 @@ public class EmailExpiryChecker {
     private static final String daySyntax = "((0*[1-9])|([1-3][0-9]))";
     private static final String monthSyntax = "((0*[1-9])|([1-2][0-2]))";
     private static final String yearSyntax = "((20[0-9]{2})|\\d{2})";
+    private static final String daySuffixes = "(st|nd|rd|th)";
 
+    
     private static final String mdyDateFormat = monthSyntax + "/" + daySyntax + "/" + yearSyntax;
     private static final String dmyDateFormat = daySyntax + "/" + monthSyntax + "/" + yearSyntax;
-    private static final String shortEngDateFormat = shortMonths + "\\s+" +daySyntax +",\\s"+yearSyntax;
-    private static final String longEngDateFormat = longMonths + "\\s" + daySyntax+ ",\\s" +yearSyntax;
+    private static final String shortMonthDateFormat = shortMonths + "\\s+" +daySyntax +",\\s"+yearSyntax;
+    private static final String longMonthDateFormat = longMonths + "\\s" + daySyntax+ ",\\s" +yearSyntax;
+    private static final String shortMonthDayDateFormat =  shortMonths + "\\s+" +daySyntax +daySuffixes;
+    private static final String longMonthDayDateFormat =  longMonths + "\\s+" +daySyntax +daySuffixes;
+
+    //Format to check if a date is missing a year
+    private static final String endsWithYearFormat =  ".*" + yearSyntax + "$";
 
     //Hashmap for different datePatterns and their corresponding dateFormatters
     private static final HashMap<Pattern,DateTimeFormatter> datePatterns = new HashMap<>();
@@ -24,8 +31,10 @@ public class EmailExpiryChecker {
     public EmailExpiryChecker() {
         datePatterns.put(Pattern.compile(dmyDateFormat),DateTimeFormatter.ofPattern("d/M/y"));
         datePatterns.put(Pattern.compile(mdyDateFormat),DateTimeFormatter.ofPattern("M/d/y"));
-        datePatterns.put(Pattern.compile(shortEngDateFormat),DateTimeFormatter.ofPattern("MMM d, y"));
-        datePatterns.put(Pattern.compile(longEngDateFormat),DateTimeFormatter.ofPattern("MMMM d, y"));
+        datePatterns.put(Pattern.compile(shortMonthDateFormat),DateTimeFormatter.ofPattern("MMM d, y"));
+        datePatterns.put(Pattern.compile(longMonthDateFormat),DateTimeFormatter.ofPattern("MMMM d, y"));
+        datePatterns.put(Pattern.compile(shortMonthDayDateFormat),DateTimeFormatter.ofPattern("MMM d, y"));
+        datePatterns.put(Pattern.compile(longMonthDayDateFormat),DateTimeFormatter.ofPattern("MMMM d, y"));
     }
 
     public boolean checkExpiry(String emailBody){
@@ -46,14 +55,28 @@ public class EmailExpiryChecker {
                 while (dateMatcher.find()) {                    //while the matcher finds a date in email
                     LocalDate checkDate;
                     String StringDate = dateMatcher.group().replaceAll("\\s+"," ");
+
+                    //Pattern to check if a date is missing a year
+                    Pattern endsWithYearPattern = Pattern.compile(endsWithYearFormat);
+                    //setting the corresponding formatter to endsWithYearPattern
+                    Matcher endsWithYearMatcher = endsWithYearPattern.matcher(StringDate);
+
+                    if(!endsWithYearMatcher.find()){            //if the date doesn't end with a year
+                        //remove any daySuffixes from StringDate
+                        StringDate = dateMatcher.group().replaceAll(daySuffixes,"");
+                        //add current year to the StringDate to parse it
+                        StringDate = StringDate + ", "+ LocalDate.now().getYear();
+                    }
+
                     try{
-                        checkDate = LocalDate.parse(StringDate, formatter);     //change the string to date format
+                        checkDate = LocalDate.parse(StringDate, formatter);    //change the string to date format
                         //if no other date is found before or if this date is after the date found before
                         if (expiryDate == null || checkDate.isAfter(expiryDate)) {
                             expiryDate = checkDate;
                         }
                     } catch (Exception exp) {
                         System.out.println("Unable to format the date. Error: " + exp.getMessage());
+                        return false;
                     }
                 }
             }
