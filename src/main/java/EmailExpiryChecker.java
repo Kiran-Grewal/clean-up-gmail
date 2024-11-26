@@ -26,7 +26,10 @@ public class EmailExpiryChecker {
     //Hashmap for different datePatterns and their corresponding dateFormatters
     private static final HashMap<Pattern,DateTimeFormatter> datePatterns = new HashMap<>();
 
-    private static final String keywords = "offer|coupon|valid|expire|promotion"; //keywords to look for in an email
+    //keywords to look for in an email
+    private static final String findKeywords = "offer|coupon|valid|expire|promotion";
+    //keywords when found ignore the email
+    private static final String ignoreKeywords = "valid as of"; //
 
     public EmailExpiryChecker() {
         datePatterns.put(Pattern.compile(dmyDateFormat),DateTimeFormatter.ofPattern("d/M/y"));
@@ -38,13 +41,18 @@ public class EmailExpiryChecker {
     }
 
     public boolean checkExpiry(String emailBody){
-        Pattern keywordsPattern = Pattern.compile(keywords, Pattern.CASE_INSENSITIVE);
-        Matcher keywordsMatcher = keywordsPattern.matcher(emailBody);
+        //Pattern for findKeywords - keywords to find in emails
+        Pattern findKeywordsPattern = Pattern.compile(findKeywords, Pattern.CASE_INSENSITIVE);
+        Matcher findKeywordsMatcher = findKeywordsPattern.matcher(emailBody);
+        //Pattern for ignoreKeywords - keywords to ignore emails
+        Pattern ignorekeywordsPattern = Pattern.compile(ignoreKeywords, Pattern.CASE_INSENSITIVE);
+        Matcher ignoreKeywordsMatcher = ignorekeywordsPattern.matcher(emailBody);
         LocalDate expiryDate = null;
         LocalDate today = LocalDate.now();                      //today's date
         boolean isExpired;                                      //is true if an email has expired coupon/offer
 
-        if(keywordsMatcher.find()){                             //if a keyword is found in an email
+        //if a findKeyword is found in an email and ignoreKeyword is not found
+        if(findKeywordsMatcher.find() && !ignoreKeywordsMatcher.find()){
             Pattern datePattern = findDateFormat(emailBody);    //returns the dateFormat found in the email
 
             if(datePattern != null){
