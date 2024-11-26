@@ -7,8 +7,8 @@ import java.util.regex.Pattern;
 public class EmailExpiryChecker {
     private static final String shortMonths = "(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)";
     private static final String longMonths = "(January|February|March|April|May|June|July|August|September|October|November|December)";
-    private static final String daySyntax = "((0*[1-9])|([1-3][0-9]))";
-    private static final String monthSyntax = "((0*[1-9])|([1-2][0-2]))";
+    private static final String daySyntax = "((0*[1-9])|([1-2][0-9])|(3[0-1]))";
+    private static final String monthSyntax = "((0*[1-9])|(1[0-2]))";
     private static final String yearSyntax = "((20[0-9]{2})|\\d{2})";
     private static final String daySuffixes = "(st|nd|rd|th)";
 
@@ -56,9 +56,9 @@ public class EmailExpiryChecker {
                     LocalDate checkDate;
                     String StringDate = dateMatcher.group().replaceAll("\\s+"," ");
 
-                    //Pattern to check if a date is missing a year
+                    //Pattern to check if the date is missing a year
                     Pattern endsWithYearPattern = Pattern.compile(endsWithYearFormat);
-                    //setting the corresponding formatter to endsWithYearPattern
+                    //setting the corresponding matcher to endsWithYearPattern
                     Matcher endsWithYearMatcher = endsWithYearPattern.matcher(StringDate);
 
                     if(!endsWithYearMatcher.find()){            //if the date doesn't end with a year
