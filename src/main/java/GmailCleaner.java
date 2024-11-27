@@ -7,8 +7,8 @@ public class GmailCleaner {
 
     public static void main(String[] args) throws IOException, GeneralSecurityException {
 
-        GmailService gmailservice = new GmailService();
-        Gmail service = gmailservice.getGmailService(); //gmail API client service.
+        GmailService gmailService = new GmailService();
+        Gmail service = gmailService.getGmailService(); //gmail API client service.
 
         EmailTrasher emailTrasher = new EmailTrasher(service);
 
