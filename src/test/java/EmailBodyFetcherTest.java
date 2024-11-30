@@ -22,6 +22,7 @@ class EmailBodyFetcherTest {
     private EmailBodyFetcher emailBodyFetcher;
     private Message mockMsg;
     private final String mockMsgId = "";
+    private MessagePart mockMsgPayload;
 
     @BeforeEach
     public void setUp() throws IOException {
@@ -36,28 +37,30 @@ class EmailBodyFetcherTest {
         when(mockUser.messages()).thenReturn(mockMessages);
         when(mockMessages.get("me",mockMsgId)).thenReturn(mockGetRequest);
         when(mockGetRequest.execute()).thenReturn(mockMsg);
+
+        mockMsgPayload = new MessagePart();
     }
 
     @Test
     @DisplayName("When text/plain is the only mime type")
     public void getEmailBodyTest1() {
-            MessagePart mockMsgPayload = new MessagePart();
-            MessagePartBody mockBody = new MessagePartBody();
-            String mockData = "dGV4dC9wbGFpbiBwYXJ0";           //base64URL encoded String for "text/plain part"
 
-            mockMsgPayload.setMimeType("text/plain");
-            mockBody.setData(mockData);
-            mockMsgPayload.setBody(mockBody);
-            mockMsg.setPayload(mockMsgPayload);
+        MessagePartBody mockBody = new MessagePartBody();
+        String mockData = "dGV4dC9wbGFpbiBwYXJ0";           //base64URL encoded String for "text/plain part"
 
-            String result = emailBodyFetcher.getEmailBody(mockMsgId);
-            Assertions.assertEquals(result,"text/plain part");
+        mockMsgPayload.setMimeType("text/plain");
+        mockBody.setData(mockData);
+        mockMsgPayload.setBody(mockBody);
+        mockMsg.setPayload(mockMsgPayload);
+
+        String result = emailBodyFetcher.getEmailBody(mockMsgId);
+        Assertions.assertEquals(result, "text/plain part");
     }
 
     @Test
     @DisplayName("When html/plain is the only mime type")
     public void getEmailBodyTest2() {
-        MessagePart mockMsgPayload = new MessagePart();
+
         MessagePartBody mockBody = new MessagePartBody();
         String mockData = "aHRtbC9wbGFpbiBwYXJ0";               //base64URL encoded String for "html/plain part"
 
@@ -74,7 +77,6 @@ class EmailBodyFetcherTest {
     @DisplayName("When text/plain is inside multipart mime type")
     public void getEmailBodyTest3() {
 
-        MessagePart mockMsgPayload = new MessagePart();
         mockMsgPayload.setMimeType("multipart/alternative");
         List<MessagePart> mockParts = new ArrayList<>();
         MessagePart mockMsgPart = new MessagePart();      //mockMsgPart inside original mockMsgPayload
@@ -97,7 +99,6 @@ class EmailBodyFetcherTest {
     @DisplayName("When text/plain and html/plain are both inside multipart/mixed type")
     public void getEmailBodyTest4() {
 
-        MessagePart mockMsgPayload = new MessagePart();
         mockMsgPayload.setMimeType("multipart/mixed");
         List<MessagePart> mockParts = new ArrayList<>();
 
@@ -129,30 +130,29 @@ class EmailBodyFetcherTest {
     @DisplayName("When text/plain is in multipart/alternative which is in multipart/mixed type")
     public void getEmailBodyTest5() {
 
-        MessagePart mockMsgPayload = new MessagePart();
         mockMsgPayload.setMimeType("multipart/mixed");
         List<MessagePart> mockParts = new ArrayList<>();
 
         //mockMsgPart1 inside original mockMsgPayload
-        MessagePart mockMsgPart1 = new MessagePart();
-        mockMsgPart1.setMimeType("multipart/alternative");
+        MessagePart mockMsgPart = new MessagePart();
+        mockMsgPart.setMimeType("multipart/alternative");
         List<MessagePart> mockPartsOfParts = new ArrayList<>();
 
         //mockMsgPart2 inside mockMsgPart1 mockMsgPayload
-        MessagePart mockMsgPart2 = new MessagePart();
+        MessagePart mockNestedMsgPart = new MessagePart();
         MessagePartBody mockBody = new MessagePartBody();
-        mockMsgPart2.setMimeType("text/plain");
+        mockNestedMsgPart.setMimeType("text/plain");
         //base64URL encoded String for "text/plain part in multipart/alternative inside multipart/mixed"
         String mockData =
                 "dGV4dC9wbGFpbiBwYXJ0IGluIG11bHRpcGFydC9hbHRlcm5hdGl2ZSBpbnNpZGUgbXVsdGlwYXJ0L21peGVk";
 
         mockBody.setData(mockData);
-        mockMsgPart2.setBody(mockBody);             //setting body for text/plain mockMsgPart
+        mockNestedMsgPart.setBody(mockBody);             //setting body for text/plain mockMsgPart
 
-        mockParts.add(mockMsgPart1);
-        mockPartsOfParts.add(mockMsgPart2);
+        mockParts.add(mockMsgPart);
+        mockPartsOfParts.add(mockNestedMsgPart);
         mockMsgPayload.setParts(mockParts);
-        mockMsgPart1.setParts(mockPartsOfParts);
+        mockMsgPart.setParts(mockPartsOfParts);
         mockMsg.setPayload(mockMsgPayload);
 
         String result = emailBodyFetcher.getEmailBody(mockMsgId);

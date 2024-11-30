@@ -13,15 +13,15 @@ public class EmailExpiryChecker {
     private static final String daySuffixes = "(st|nd|rd|th)";
 
     
-    private static final String mdyDateFormat = monthSyntax + "/" + daySyntax + "/" + yearSyntax;
-    private static final String dmyDateFormat = daySyntax + "/" + monthSyntax + "/" + yearSyntax;
-    private static final String shortMonthDateFormat = shortMonths + "\\s+" +daySyntax +",\\s"+yearSyntax;
-    private static final String longMonthDateFormat = longMonths + "\\s" + daySyntax+ ",\\s" +yearSyntax;
-    private static final String shortMonthDayDateFormat =  shortMonths + "\\s+" +daySyntax +daySuffixes;
-    private static final String longMonthDayDateFormat =  longMonths + "\\s+" +daySyntax +daySuffixes;
+    private static final String mdyDateFormat = "\\s"+ monthSyntax + "/" + daySyntax + "/" + yearSyntax + "\\s";
+    private static final String dmyDateFormat = "\\s"+ daySyntax + "/" + monthSyntax + "/" + yearSyntax + "\\s";
+    private static final String shortMonthDateFormat = "\\s"+ shortMonths + "\\s+" +daySyntax +",\\s"+yearSyntax + "\\s";
+    private static final String longMonthDateFormat = "\\s"+ longMonths + "\\s" + daySyntax+ ",\\s" +yearSyntax + "\\s";
+    private static final String shortMonthDayDateFormat = "\\s"+ shortMonths + "\\s+" +daySyntax + "\\s";
+    private static final String longMonthDayDateFormat = "\\s"+ longMonths + "\\s+" +daySyntax + "\\s";
 
     //Format to check if a date is missing a year
-    private static final String endsWithYearFormat =  ".*" + yearSyntax + "$";
+    private static final String endsWithYearFormat =  ".*" + "/|(,\\s)" + yearSyntax + "$";
 
     //Hashmap for different datePatterns and their corresponding dateFormatters
     private static final HashMap<Pattern,DateTimeFormatter> datePatterns = new HashMap<>();
@@ -62,8 +62,7 @@ public class EmailExpiryChecker {
 
                 while (dateMatcher.find()) {                    //while the matcher finds a date in email
                     LocalDate checkDate;
-                    String StringDate = dateMatcher.group().replaceAll("\\s+"," ");
-
+                    String StringDate = dateMatcher.group().trim();
                     //Pattern to check if the date is missing a year
                     Pattern endsWithYearPattern = Pattern.compile(endsWithYearFormat);
                     //setting the corresponding matcher to endsWithYearPattern
@@ -71,7 +70,7 @@ public class EmailExpiryChecker {
 
                     if(!endsWithYearMatcher.find()){            //if the date doesn't end with a year
                         //remove any daySuffixes from StringDate
-                        StringDate = dateMatcher.group().replaceAll(daySuffixes,"");
+                        StringDate = StringDate.replaceAll(daySuffixes,"");
                         //add current year to the StringDate to parse it
                         StringDate = StringDate + ", "+ LocalDate.now().getYear();
                     }
@@ -98,7 +97,7 @@ public class EmailExpiryChecker {
         return isExpired;
     }
 
-    public Pattern findDateFormat(String emailBody) {       //finds dateFormat in an email
+    private Pattern findDateFormat(String emailBody) {       //finds dateFormat in an email
         Pattern pattern = null;
         Matcher dateMatcher;
         for(Pattern pat: datePatterns.keySet()) {           //for every datePattern pat in datePatterns keys
