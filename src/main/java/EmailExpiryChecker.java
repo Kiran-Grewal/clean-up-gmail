@@ -11,14 +11,13 @@ public class EmailExpiryChecker {
     private static final String monthSyntax = "((0*[1-9])|(1[0-2]))";
     private static final String yearSyntax = "((20[0-9]{2})|\\d{2})";
     private static final String daySuffixes = "(st|nd|rd|th)";
-
     
     private static final String mdyDateFormat = "\\s"+ monthSyntax + "/" + daySyntax + "/" + yearSyntax + "\\s";
     private static final String dmyDateFormat = "\\s"+ daySyntax + "/" + monthSyntax + "/" + yearSyntax + "\\s";
-    private static final String shortMonthDateFormat = "\\s"+ shortMonths + "\\s+" +daySyntax +",\\s"+yearSyntax + "\\s";
-    private static final String longMonthDateFormat = "\\s"+ longMonths + "\\s" + daySyntax+ ",\\s" +yearSyntax + "\\s";
-    private static final String shortMonthDayDateFormat = "\\s"+ shortMonths + "\\s+" +daySyntax + "\\s";
-    private static final String longMonthDayDateFormat = "\\s"+ longMonths + "\\s+" +daySyntax + "\\s";
+    private static final String shortMonthDateFormat = "\\s"+ shortMonths + "\\s+" +daySyntax +",\\s"+ yearSyntax;
+    private static final String longMonthDateFormat = "\\s"+ longMonths + "\\s+" + daySyntax+ ",\\s" + yearSyntax;
+    private static final String shortMonthDayDateFormat = "\\s"+ shortMonths + "\\s+" +daySyntax + "\\s+";
+    private static final String longMonthDayDateFormat = "\\s"+ longMonths + "\\s+" +daySyntax + "\\s+";
 
     //Format to check if a date is missing a year
     private static final String endsWithYearFormat =  ".*" + "/|(,\\s)" + yearSyntax + "$";
@@ -63,6 +62,8 @@ public class EmailExpiryChecker {
                 while (dateMatcher.find()) {                    //while the matcher finds a date in email
                     LocalDate checkDate;
                     String StringDate = dateMatcher.group().trim();
+                    StringDate = StringDate.replaceAll("\n"," ")
+                                           .replaceAll("\\s+"," ");
                     //Pattern to check if the date is missing a year
                     Pattern endsWithYearPattern = Pattern.compile(endsWithYearFormat);
                     //setting the corresponding matcher to endsWithYearPattern
