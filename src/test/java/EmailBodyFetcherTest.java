@@ -35,7 +35,7 @@ class EmailBodyFetcherTest {
 
         when(mockService.users()).thenReturn(mockUser);
         when(mockUser.messages()).thenReturn(mockMessages);
-        when(mockMessages.get("me",mockMsgId)).thenReturn(mockGetRequest);
+        when(mockMessages.get("me", mockMsgId)).thenReturn(mockGetRequest);
         when(mockGetRequest.execute()).thenReturn(mockMsg);
 
         mockMsgPayload = new MessagePart();
@@ -70,7 +70,7 @@ class EmailBodyFetcherTest {
         mockMsg.setPayload(mockMsgPayload);
 
         String result = emailBodyFetcher.getEmailBody(mockMsgId);
-        Assertions.assertEquals(result,"");
+        Assertions.assertEquals(result, "");
     }
 
     @Test
@@ -83,7 +83,7 @@ class EmailBodyFetcherTest {
         MessagePartBody mockBody = new MessagePartBody();
         mockMsgPart.setMimeType("text/plain");
         String mockData =
-              "dGV4dC9wbGFpbiBwYXJ0IGluIG11bHRpcGFydA=="; //base64URL encoded String for "text/plain part in multipart"
+                "dGV4dC9wbGFpbiBwYXJ0IGluIG11bHRpcGFydA=="; //base64URL encoded String for "text/plain part in multipart"
 
         mockBody.setData(mockData);
         mockMsgPart.setBody(mockBody);
@@ -92,7 +92,7 @@ class EmailBodyFetcherTest {
         mockMsg.setPayload(mockMsgPayload);
 
         String result = emailBodyFetcher.getEmailBody(mockMsgId);
-        Assertions.assertEquals(result,"text/plain part in multipart");
+        Assertions.assertEquals(result, "text/plain part in multipart");
     }
 
     @Test
@@ -122,7 +122,7 @@ class EmailBodyFetcherTest {
         mockMsg.setPayload(mockMsgPayload);
 
         String result = emailBodyFetcher.getEmailBody(mockMsgId);
-        Assertions.assertEquals(result,"text/plain part in multipart");
+        Assertions.assertEquals(result, "text/plain part in multipart");
     }
 
 
@@ -156,6 +156,7 @@ class EmailBodyFetcherTest {
         mockMsg.setPayload(mockMsgPayload);
 
         String result = emailBodyFetcher.getEmailBody(mockMsgId);
-        Assertions.assertEquals(result,"text/plain part in multipart/alternative inside multipart/mixed");
+        Assertions.assertEquals(result, "text/plain part in multipart/alternative inside multipart/mixed");
     }
+
 }
